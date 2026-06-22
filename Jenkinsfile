@@ -37,11 +37,13 @@ pipeline {
             steps {
                 echo '--- PASO 4: ANÁLISIS DE COMPOSICIÓN (SCA) Y ESCANEO DINÁMICO (DAST) ---'
                 
-                // Ejecución del analisis de librerías sobre requirements.txt
-                dependencyCheck odcInstallation: 'Dependency-Check-Instalacion', additionalArguments: '--scan ./requirements.txt --format HTML'
+                // Quitamos la dependencia del nombre global para evitar el error de interfaz
+                dependencyCheck additionalArguments: '--scan ./requirements.txt --format HTML'
                 
-                // Simulación del ataque dinámico de OWASP ZAP sobre el puerto de Flask
-                sh 'sudo docker run --rm -v \$(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:5000 -r reporte_zap.html || true'
+                // Mapeo dinámico con comillas triples para OWASP ZAP
+                sh """
+                sudo docker run --rm -v \$(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:5000 -r reporte_zap.html || true
+                """
             }
         }
 
